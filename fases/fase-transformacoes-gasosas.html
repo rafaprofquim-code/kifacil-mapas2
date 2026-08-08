@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transformações Gasosas — Jogo Premium | KiFácil</title>
+<meta name="description" content="Fase interativa sobre as transformações gasosas — Boyle, Charles e Gay-Lussac — da Academia KiFácil.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* página (clara, "jogos premium") */
+    --pg-bg:        #fdf8f0;
+    --pg-card:      #fffdf9;
+    --pg-text:      #1a1208;
+    --pg-text-soft: #3d2e1a;
+    --pg-gold:      #8a5e10;
+    --pg-gold-lt:   #c8920a;
+    --pg-border:    rgba(100,70,20,0.3);
+    --pg-border-strong: rgba(100,70,20,0.5);
+
+    /* cartões escuros (aparelho, palco, dados) — inalterado do experimento */
+    --bg:           #2e2016;
+    --text:         #f5ead0;
+    --text-soft:    #e8d4b0;
+    --text-faint:   rgba(232,216,176,0.45);
+    --gold:         #e8b84b;
+    --gold-deep:    #b8891e;
+    --border:       rgba(212,170,106,0.4);
+    --panel-bg:     rgba(14,6,0,0.94);
+    --green-border: rgba(80,200,120,0.5);
+    --green-text:   #8fe0a0;
+    --red-border:   rgba(217,95,59,0.4);
+    --red-text:     #e8956a;
+    --pg-green:     #2f7d4f;
+    --pg-red:       #a8391b;
+  }
+
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: var(--pg-bg);
+    color: var(--pg-text);
+    display: flex; flex-direction: column;
+  }
+
+  /* ── NAV ── */
+  .top-nav {
+    background: #1e1008;
+    border-bottom: 2px solid var(--pg-gold-lt);
+    padding: 0 2.5rem; height: 52px;
+    display: flex; align-items: center; flex-shrink: 0;
+  }
+  .brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 600;
+    color: #fff8ee; letter-spacing: .03em;
+  }
+
+  /* ── MAIN ── */
+  main {
+    flex: 1; min-height: 0; min-width: 0; max-width: 1100px; margin: 0 auto; width: 100%;
+    padding: 1rem 1.5rem; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .titulo-jogo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 600;
+    margin-bottom: .2rem; line-height: 1.1; flex-shrink: 0;
+  }
+  .subtitulo { font-size: .9rem; color: var(--pg-text-soft); margin-bottom: .8rem; max-width: 700px; flex-shrink: 0; }
+
+  /* ── PROFESSORA RAFAELA (narrador em fluxo, acima da cena) ── */
+  .narrador {
+    display: flex; align-items: flex-start; gap: 1rem;
+    margin: 0 auto .8rem; max-width: 900px; width: 100%;
+    height: 172px;
+    padding: .8rem 1rem;
+    border: 1.5px solid var(--pg-border-strong);
+    border-radius: 10px;
+    background: rgba(30,16,8,0.05);
+    flex-shrink: 0; overflow-y: auto;
+  }
+  .narrador-body { flex: 1; min-width: 0; }
+  #teacher-img {
+    width: 62px; height: 76px; object-fit: cover; object-position: top center;
+    border-radius: 10px; border: 1px solid rgba(200,146,10,.35);
+    flex-shrink: 0; background: #efe3d0; transition: opacity .25s ease;
+  }
+  .narrador-nome {
+    font-family: 'Cormorant Garamond', serif; font-size: .74rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--pg-gold-lt);
+    margin-bottom: .25rem;
+  }
+  #teacher-text { font-size: .92rem; line-height: 1.5; color: var(--pg-text-soft); min-height: 1.5em; }
+  .narrador-equacao {
+    display: none; margin-top: .3rem; padding: 5px 14px; border-radius: 8px;
+    background: var(--pg-card); border: 1.5px solid var(--pg-border-strong);
+    text-align: center; font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem; font-weight: 700; letter-spacing: .5px; color: var(--pg-gold);
+  }
+  .narrador-equacao.show { display: block; }
+
+  .narrador-pergunta { display: none; margin-top: .3rem; }
+  .narrador-pergunta.show { display: block; }
+  .choices { display: flex; flex-direction: row; gap: .45rem; flex-wrap: wrap; }
+  .choice-btn {
+    font-family: 'Libre Baskerville', Georgia, serif; text-align: center;
+    background: var(--pg-card); border: 1.5px solid var(--pg-border-strong); border-radius: 6px;
+    color: var(--pg-text-soft); padding: .28rem .8rem; font-size: .8rem;
+    cursor: pointer; transition: border-color .15s, background .15s; flex: 1 1 auto;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--pg-gold-lt); background: rgba(200,146,10,.08); }
+  .choice-btn:disabled { cursor: default; opacity: .5; }
+  .feedback { min-height: 10px; margin-top: .2rem; font-size: .76rem; font-weight: 700; }
+  .feedback.ok  { color: var(--pg-green); }
+  .feedback.err { color: var(--pg-red); }
+
+  #btn-avancar {
+    margin-top: .3rem;
+    background: #1e1008; color: var(--pg-gold-lt);
+    border: 1.5px solid var(--pg-gold-lt);
+    font-family: 'Cormorant Garamond', serif; font-size: .88rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: .3rem 1.3rem; border-radius: 4px; cursor: pointer;
+    transition: background .2s, color .2s, opacity .2s;
+    opacity: 0; pointer-events: none;
+  }
+  #btn-avancar.show { opacity: 1; pointer-events: all; }
+  #btn-avancar:hover { background: var(--pg-gold-lt); color: #1e1008; }
+
+  body.intro-ativa #palco-jogo,
+  body.intro-ativa .imagem-wrapper { filter: brightness(.7); pointer-events: none; }
+
+  /* ── ÁREA DA CENA — tamanho fixo, não depende do texto da Rafaela ── */
+  .stage-slot { flex: 1; min-height: 0; min-width: 0; display: flex; align-items: center; justify-content: center; }
+  .stage-row { display: flex; gap: 1.2rem; align-items: center; justify-content: center; min-width: 0; min-height: 0; max-height: 100%; }
+
+  /* ── IMAGEM / CENA ── */
+  .imagem-wrapper {
+    position: relative; min-width: 0;
+    width: fit-content; max-height: min(46vh, 420px);
+    border: 1.5px solid var(--pg-border-strong);
+    border-radius: 6px; overflow: hidden; background: #f7efe2;
+  }
+  #scene-img { display: block; max-width: 100%; max-height: min(46vh, 420px); width: auto; height: auto; object-fit: contain; }
+
+  .overlay-indicadores {
+    position: absolute; left: 50%; top: 4%; transform: translateX(-50%); z-index: 30;
+    display: flex; gap: .7rem; flex-wrap: nowrap;
+  }
+  .indicador {
+    text-align: center; background: rgba(255,253,246,0.92);
+    border: 1px solid var(--pg-border); border-radius: 8px; padding: 5px 12px;
+    min-width: 74px;
+  }
+  .indicador-valor { font-family: 'Cormorant Garamond', serif; font-weight: 700; color: var(--pg-gold); font-size: 1.05rem; }
+  .indicador-label { font-size: .62rem; color: var(--pg-text-soft); text-transform: uppercase; letter-spacing: .07em; }
+
+  /* ══════════ APARELHO — DESENHADO EM CSS (inalterado) ══════════ */
+  #apparatus-wrap {
+    position: absolute; left: 50%; top: 56%;
+    transform: translate(-50%, -50%) scale(.82);
+    z-index: 5;
+  }
+  #instrument-row { display: flex; align-items: flex-end; gap: 22px; }
+  .instrument-col { display: flex; flex-direction: column; align-items: center; position: relative; }
+  .instrument-label { font-size: 8px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-top: 6px; }
+  .instrument-num {
+    margin-top: 4px; font-size: 11px; font-weight: 700; color: var(--text);
+    background: var(--panel-bg); border: 1px solid var(--border);
+    border-radius: 5px; padding: 2px 8px; min-width: 46px; text-align: center;
+  }
+
+  .thermo-stem {
+    position: relative; width: 16px; height: 150px; border-radius: 9px;
+    background: rgba(255,255,255,0.08); border: 2px solid rgba(210,225,235,0.5);
+    overflow: hidden; box-shadow: inset 0 0 8px rgba(255,255,255,.15);
+  }
+  .thermo-fill {
+    position: absolute; left: 0; bottom: 0; width: 100%;
+    background: linear-gradient(180deg,#ff8a5c,#d43b1f);
+    transition: height .5s ease;
+  }
+  .thermo-bulb {
+    width: 28px; height: 28px; border-radius: 50%; margin-top: -4px;
+    background: radial-gradient(circle at 35% 30%,#ff9c74,#c22c12);
+    border: 2px solid rgba(210,225,235,.5); box-shadow: 0 3px 8px rgba(0,0,0,.5);
+  }
+
+  .tube-col { margin-top: 54px; }
+  .glass-tube {
+    position: relative; width: 112px; height: 190px; border-radius: 10px;
+    border-top: 6px solid var(--gold-deep); border-bottom: 6px solid var(--gold-deep);
+    border-left: 2px solid rgba(210,225,235,.7); border-right: 2px solid rgba(210,225,235,.7);
+    background: linear-gradient(180deg, rgba(70,110,150,0.45), rgba(20,32,46,0.72) 45%, rgba(10,18,28,0.8));
+    box-shadow: inset 0 0 24px rgba(150,190,220,.18), inset 10px 0 20px rgba(255,255,255,.08), 0 10px 22px rgba(0,0,0,.5);
+  }
+  #molecule-tube { position: absolute; inset: 0; overflow: hidden; border-radius: 5px; }
+  #molecule-tube canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  #piston-rod {
+    position: absolute; left: 50%; top: -42px; width: 7px;
+    background: linear-gradient(90deg,#2b2b2b,#7a7a7a,#2b2b2b);
+    border-radius: 3px; box-shadow: 0 0 4px rgba(0,0,0,.6);
+    transform: translateX(-50%); z-index: 5;
+  }
+  #piston-disc {
+    position: absolute; left: 50%; width: 92%; height: 10px;
+    background: linear-gradient(180deg,#dfe5e9,#8b939b);
+    border: 1px solid rgba(0,0,0,.35); border-radius: 4px;
+    box-shadow: 0 3px 6px rgba(0,0,0,.5);
+    transform: translateX(-50%); z-index: 6;
+  }
+  #piston-handle {
+    position: absolute; left: 50%; top: -52px; width: 14px; height: 14px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%,#f3d98a,#a97a1c);
+    box-shadow: 0 2px 4px rgba(0,0,0,.5); transform: translateX(-50%); z-index: 6;
+  }
+
+  .lock-badge {
+    display: none; position: absolute; left: 50%; font-size: 22px; z-index: 8;
+    transform: translate(-50%,-50%) rotate(-10deg); pointer-events: none;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,.6));
+  }
+  .lock-badge.show { display: block; }
+  #lock-piston { top: -52px; }
+  #lock-thermo { top: 160px; }
+  #lock-gauge { top: -6px; }
+
+  .burner-stack { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 60px; margin-top: 8px; }
+  #flame {
+    width: 24px; height: 30px; border-radius: 50% 50% 45% 45%;
+    background: radial-gradient(circle at 46% 20%, #ffe98f 0%, #ffab34 55%, #d04a1f 100%);
+    filter: blur(.3px) drop-shadow(0 0 10px rgba(243,127,18,.55));
+    opacity: 0; transform: scaleY(.15); transform-origin: center bottom;
+    transition: opacity .4s ease, transform .4s cubic-bezier(.3,.8,.3,1);
+    animation: flicker .15s infinite alternate;
+  }
+  #flame.on { opacity: .96; }
+  @keyframes flicker {
+    from { filter: blur(.2px) brightness(1.04) drop-shadow(0 0 8px rgba(243,127,18,.4)); }
+    to   { filter: blur(.5px) brightness(.97) drop-shadow(0 0 13px rgba(243,127,18,.6)); }
+  }
+  .burner-stand {
+    width: 66px; height: 14px; margin-top: 5px; border-radius: 4px;
+    background: linear-gradient(180deg,#7a5a2a,#3a2a10);
+    border-top: 2px solid rgba(232,184,75,.4);
+    box-shadow: 0 4px 10px rgba(0,0,0,.5);
+  }
+
+  .gauge-face {
+    position: relative; width: 58px; height: 58px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #f5ecd0, #d8c48f 70%, #a9781f);
+    border: 3px solid var(--gold-deep);
+    box-shadow: 0 4px 10px rgba(0,0,0,.5), inset 0 0 6px rgba(0,0,0,.25);
+    transition: box-shadow .5s ease;
+  }
+  .gauge-face::after {
+    content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px;
+    border-radius: 50%; background: #3a2a10; transform: translate(-50%,-50%); z-index: 2;
+  }
+  #gauge-needle {
+    position: absolute; left: 50%; top: 50%; width: 2.5px; height: 22px; background: #7a1a1a;
+    transform-origin: 50% 100%; transform: translate(-50%,-100%) rotate(0deg);
+    transition: transform .5s ease; border-radius: 2px; z-index: 1;
+  }
+
+  .crank-wheel {
+    width: 58px; height: 58px; border-radius: 50%; margin: 0 auto 8px; position: relative;
+    background: repeating-conic-gradient(var(--gold) 0deg 8deg, var(--gold-deep) 8deg 40deg);
+    border: 4px solid #2a1c10; box-shadow: 0 4px 10px rgba(0,0,0,.5);
+    transition: transform .1s linear;
+  }
+  .crank-wheel::before {
+    content: ''; position: absolute; inset: 14px; border-radius: 50%;
+    background: var(--panel-bg); border: 2px solid rgba(232,184,75,.4);
+  }
+  .crank-wheel::after {
+    content: ''; position: absolute; right: -9px; top: 50%; width: 16px; height: 6px;
+    background: #3a2a10; border-radius: 3px; transform: translateY(-50%);
+    box-shadow: 0 0 3px rgba(0,0,0,.6);
+  }
+
+  /* ══════════ PALCO — só o controle interativo, ao lado da cena ══════════ */
+  .palco-jogo { width: 220px; flex: 0 0 220px; margin: 0; align-self: center; }
+  .painel-dados {
+    background: var(--panel-bg);
+    border: 1.5px solid var(--gold-deep);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    color: var(--text);
+    box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  }
+
+  .control-caption { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; text-align: center; }
+  .control-row { margin-bottom: 0; }
+
+  input[type="range"].slider { width: 100%; accent-color: var(--gold); cursor: pointer; }
+
+  .btn-gold {
+    font-family: 'Cormorant Garamond', serif; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    background: linear-gradient(135deg, #e8b84b, #b8891e);
+    border: none; border-radius: 7px; color: #1a0f08;
+    padding: .75rem 1.1rem; font-size: 15px;
+    cursor: pointer; width: 100%;
+    transition: filter .15s, transform .15s;
+  }
+  .btn-gold:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── ETAPA FINAL — ASSOCIAÇÃO (cartão escuro, ocupa o espaço da cena) ── */
+  #final-board {
+    display: none; width: min(100%, 820px); margin: 0 auto;
+    align-self: center; max-height: 100%; overflow-y: auto;
+    padding: .8rem .9rem;
+  }
+  #final-board.show { display: block; }
+  .final-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; color: var(--gold); text-align: center; margin-bottom: 2px; }
+  .final-sub { font-size: 11px; color: var(--text-soft); text-align: center; margin-bottom: 10px; }
+  .final-grid { display: grid; grid-template-columns: 180px 1fr; gap: 12px; }
+
+  .scrolls { display: flex; flex-direction: column; gap: 8px; }
+  .scroll {
+    position: relative; min-height: 46px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 14px; color: #3a2712;
+    padding: 6px 12px; cursor: grab; user-select: none;
+    background: linear-gradient(180deg, #f3e6c8, #e6d3a3);
+    border: 1px solid #b89a5e;
+    box-shadow: 0 4px 10px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,255,255,.35);
+    transition: opacity .15s, transform .15s, box-shadow .15s;
+  }
+  .scroll.selected { box-shadow: 0 0 0 3px var(--gold), 0 4px 10px rgba(0,0,0,.4); transform: translateY(-2px); }
+  .scroll.placed { cursor: default; opacity: 0; pointer-events: none; position: absolute; }
+
+  .targets { display: flex; flex-direction: column; gap: 8px; }
+  .target {
+    border: 1.5px dashed var(--border); border-radius: 10px;
+    padding: 8px; background: rgba(255,255,255,0.02);
+    min-height: 56px; display: grid; grid-template-columns: 52px 1fr; gap: 10px; align-items: center;
+    transition: border-color .2s, background .2s;
+  }
+  .target.dragover { border-color: var(--gold); background: rgba(232,184,75,0.06); }
+  .target.correct { border-style: solid; border-color: var(--green-border); background: rgba(80,200,120,0.07); }
+  .mini-diagram {
+    width: 52px; height: 52px; border-radius: 7px;
+    background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .mini-tube {
+    position: absolute; left: 50%; top: 8%; width: 30%; height: 50%; transform: translateX(-50%);
+    border-radius: 4px; border-top: 3px solid var(--gold-deep); border-bottom: 3px solid var(--gold-deep);
+    border-left: 1px solid rgba(210,225,235,.5); border-right: 1px solid rgba(210,225,235,.5);
+    background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(180,210,230,.05));
+  }
+  .mini-flame {
+    position: absolute; left: 50%; bottom: 8%; width: 20%; height: 22%; transform: translateX(-50%);
+    border-radius: 50% 50% 45% 45%;
+    background: radial-gradient(circle at 46% 20%, #ffe98f 0%, #ffab34 55%, #d04a1f 100%);
+  }
+  .mini-lock { position: absolute; right: 8%; top: 6%; font-size: 12px; }
+  .target-label { font-size: 11.5px; line-height: 1.35; color: var(--text-soft); }
+  .target.correct .target-label { color: var(--text); }
+  .final-target-name { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--gold); margin-bottom: 2px; display: block; }
+
+  .final-feedback { text-align: center; font-size: 12px; font-weight: 700; color: var(--green-text); min-height: 16px; margin-top: 10px; }
+
+  /* ── TELA FINAL (cartão escuro, ocupa o espaço da cena) ── */
+  #win-screen { display: none; width: min(100%, 640px); margin: 0 auto; align-self: center; text-align: center; }
+  #win-screen.show { display: block; }
+  .win-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; color: var(--gold); margin-bottom: 10px; }
+  .win-sub { font-size: 14px; color: var(--text-soft); font-style: italic; margin-bottom: 20px; line-height: 1.7; }
+  .btn-restart {
+    background: var(--gold); border: none; border-radius: 7px;
+    padding: 12px 30px; font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 700;
+    color: #1a0f08; cursor: pointer; letter-spacing: .05em; text-transform: uppercase;
+  }
+  .btn-restart:hover { filter: brightness(1.08); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg); border-top: 2px solid var(--gold-deep);
+    padding: .35rem 2rem; text-align: center; font-size: .7rem;
+    color: rgba(255,248,238,0.5); flex-shrink: 0;
+  }
+
+  /* ── RESPONSIVO ── */
+  @media (max-width: 900px), (max-height: 640px) {
+    .stage-row { flex-direction: column; align-items: stretch; }
+    .palco-jogo { width: min(100%, 280px); flex: 0 0 auto; align-self: center; }
+    .imagem-wrapper { flex: 1 1 auto; width: 100%; min-height: 0; }
+    #apparatus-wrap { transform: translate(-50%, -50%) scale(.68); }
+    .palco-jogo .painel-dados { padding: .55rem .7rem; }
+    .control-caption { font-size: 9px; margin-bottom: 3px; }
+    .crank-wheel { width: 38px; height: 38px; border-width: 3px; margin-bottom: 5px; }
+    .crank-wheel::before { inset: 9px; border-width: 1.5px; }
+    .crank-wheel::after { width: 10px; height: 4px; right: -6px; }
+  }
+
+  @media (max-width: 640px) {
+    .top-nav { padding: 0 1.2rem; }
+    .narrador { padding: .6rem .8rem; gap: .6rem; height: 214px; }
+    #teacher-img { width: 56px; height: 68px; }
+    #teacher-text { font-size: .9rem; line-height: 1.55; }
+    .overlay-indicadores { gap: .4rem; top: 3%; }
+    .indicador { padding: 3px 8px; min-width: 58px; }
+    .indicador-valor { font-size: .82rem; }
+    .indicador-label { font-size: .54rem; }
+    .final-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top-nav"><div class="brand">KiFácil</div></nav>
+
+<main>
+  <h1 class="titulo-jogo">Transformações Gasosas</h1>
+  <p class="subtitulo">Descubra, observando o experimento, como pressão, volume e temperatura se relacionam nas leis de Boyle, Charles e Gay-Lussac.</p>
+
+  <!-- PROFESSORA RAFAELA -->
+  <div class="narrador">
+    <img id="teacher-img" src="../imagens/rafa-sorrindo.jpg" alt="Professora Rafaela">
+    <div class="narrador-body">
+      <div class="narrador-nome">Professora Rafaela</div>
+      <div id="teacher-text"></div>
+      <div class="narrador-equacao" id="teacher-equation"></div>
+      <div class="narrador-pergunta" id="questionBox">
+        <div class="choices" id="choicesWrap"></div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+      <button id="btn-avancar">Continuar</button>
+    </div>
+  </div>
+
+  <!-- CENA / APARELHO + PAINEL, lado a lado -->
+  <div class="stage-slot">
+  <div class="stage-row" id="stageRow">
+  <div class="imagem-wrapper" id="imagemWrapper">
+    <img id="scene-img" src="../imagens/laboratorio-transformacoes-gasosas.jpg" alt="Laboratório de transformações gasosas">
+
+    <div class="overlay-indicadores">
+      <div class="indicador"><div class="indicador-valor" id="hudTemp">300 K</div><div class="indicador-label">Temperatura</div></div>
+      <div class="indicador"><div class="indicador-valor" id="hudVolume">100%</div><div class="indicador-label">Volume</div></div>
+      <div class="indicador"><div class="indicador-valor" id="hudPressure">1.00 atm</div><div class="indicador-label">Pressão</div></div>
+    </div>
+
+    <div id="apparatus-wrap">
+      <div id="instrument-row">
+
+        <div class="instrument-col" id="thermo-col">
+          <div class="thermo-stem"><div class="thermo-fill" id="thermoFill"></div></div>
+          <div class="thermo-bulb"></div>
+          <div class="instrument-num" id="thermoNum">300 K</div>
+          <div class="instrument-label">Termômetro</div>
+          <div class="lock-badge" id="lock-thermo">🔒</div>
+        </div>
+
+        <div class="instrument-col tube-col">
+          <div class="glass-tube">
+            <div id="molecule-tube"><canvas id="moleculeCanvas"></canvas></div>
+          </div>
+          <div id="piston-rod"></div>
+          <div id="piston-disc"></div>
+          <div id="piston-handle"></div>
+          <div class="lock-badge" id="lock-piston">🔒</div>
+
+          <div class="burner-stack">
+            <div id="flame"></div>
+          </div>
+          <div class="burner-stand"></div>
+        </div>
+
+        <div class="instrument-col" id="gauge-col">
+          <div class="gauge-face"><div id="gauge-needle"></div></div>
+          <div class="instrument-num" id="gaugeNum">1.00 atm</div>
+          <div class="instrument-label">Manômetro</div>
+          <div class="lock-badge" id="lock-gauge">🔒</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- PALCO — só o controle interativo da etapa atual -->
+  <div class="palco-jogo" id="palco-jogo" style="display:none">
+    <div class="painel-dados" id="side-panel">
+      <div class="control-row" id="controlRow"></div>
+    </div>
+  </div>
+  </div><!-- /.stage-row -->
+
+  <!-- ETAPA FINAL — ASSOCIAÇÃO -->
+  <section class="painel-dados" id="final-board">
+    <div class="final-title">Síntese das Transformações Gasosas</div>
+    <div class="final-sub">Toque em um pergaminho e depois no experimento correspondente (ou arraste, no computador).</div>
+
+    <div class="final-grid">
+      <div class="scrolls" id="scrolls">
+        <div class="scroll" draggable="true" data-type="isotermica">Isotérmica</div>
+        <div class="scroll" draggable="true" data-type="isobarica">Isobárica</div>
+        <div class="scroll" draggable="true" data-type="isovolumetrica">Isovolumétrica</div>
+      </div>
+
+      <div class="targets" id="targets">
+        <div class="target" data-accept="isotermica">
+          <div class="mini-diagram">
+            <div class="mini-tube"></div>
+            <div class="mini-lock">🔒</div>
+          </div>
+          <div class="target-label"><span class="final-target-name" id="placedName-isotermica"></span>Temperatura constante — o gás é comprimido e a pressão aumenta.</div>
+        </div>
+
+        <div class="target" data-accept="isobarica">
+          <div class="mini-diagram">
+            <div class="mini-tube"></div>
+            <div class="mini-flame"></div>
+          </div>
+          <div class="target-label"><span class="final-target-name" id="placedName-isobarica"></span>Pressão constante — o gás é aquecido e o volume aumenta.</div>
+        </div>
+
+        <div class="target" data-accept="isovolumetrica">
+          <div class="mini-diagram">
+            <div class="mini-tube"></div>
+            <div class="mini-flame"></div>
+            <div class="mini-lock">🔒</div>
+          </div>
+          <div class="target-label"><span class="final-target-name" id="placedName-isovolumetrica"></span>Volume constante — o gás é aquecido e a pressão sobe rapidamente.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="final-feedback" id="finalFeedback"></div>
+  </section>
+
+  <!-- TELA FINAL -->
+  <div class="painel-dados" id="win-screen">
+    <div class="win-title">Fase Concluída!</div>
+    <p class="win-sub">Você compreendeu como pressão, volume e temperatura se relacionam nas leis de Boyle, Charles e Gay-Lussac.</p>
+    <button class="btn-restart" id="restartBtn">Refazer a fase</button>
+  </div>
+  </div><!-- /.stage-slot -->
+
+</main>
+
+<footer>© 2026 KiFácil</footer>
+
+<script>
+(function () {
+  const state = {
+    stage: 0,
+    temperature: 300,
+    pressure: 1,
+    volumeRatio: 1,
+    fillFraction: 1,
+    speedFactor: 1,
+    compression: 0,
+    heatLevel: 0,
+    hasAsked: false,
+    answered: false,
+    questionCorrect: '',
+    finalMatches: 0
+  };
+
+  const el = {
+    hudTemp: document.getElementById('hudTemp'),
+    hudVolume: document.getElementById('hudVolume'),
+    hudPressure: document.getElementById('hudPressure'),
+    controlRow: document.getElementById('controlRow'),
+    palcoJogo: document.getElementById('palco-jogo'),
+    stageRow: document.getElementById('stageRow'),
+    questionBox: document.getElementById('questionBox'),
+    choicesWrap: document.getElementById('choicesWrap'),
+    feedback: document.getElementById('feedback'),
+    glassTube: document.querySelector('.glass-tube'),
+    pistonRod: document.getElementById('piston-rod'),
+    pistonDisc: document.getElementById('piston-disc'),
+    lockThermo: document.getElementById('lock-thermo'),
+    lockPiston: document.getElementById('lock-piston'),
+    lockGauge: document.getElementById('lock-gauge'),
+    flame: document.getElementById('flame'),
+    thermoFill: document.getElementById('thermoFill'),
+    thermoNum: document.getElementById('thermoNum'),
+    gaugeNeedle: document.getElementById('gauge-needle'),
+    gaugeNum: document.getElementById('gaugeNum'),
+    gaugeFace: document.querySelector('.gauge-face'),
+    finalBoard: document.getElementById('final-board'),
+    finalFeedback: document.getElementById('finalFeedback'),
+    winScreen: document.getElementById('win-screen'),
+    restartBtn: document.getElementById('restartBtn')
+  };
+
+  /* ══════════ PROFESSORA RAFAELA ══════════ */
+  const RAFA_IMG = {
+    sorrindo:   '../imagens/rafa-sorrindo.jpg',
+    explicando: '../imagens/rafa-explicando.jpg',
+    pensando:   '../imagens/rafa-pensando.jpg',
+    animada:    '../imagens/rafa-animada.jpg'
+  };
+  const $timg = document.getElementById('teacher-img');
+  const $ttxt = document.getElementById('teacher-text');
+  const $tbtn = document.getElementById('btn-avancar');
+  const $teq = document.getElementById('teacher-equation');
+  let tbtnClickHandler = null;
+
+  const _ding = new Audio('../sons/ding.mp3');
+  _ding.preload = 'auto';
+  function tocarDing() { try { _ding.currentTime = 0; _ding.play().catch(function () {}); } catch (e) {} }
+
+  function rafaFala(imgKey, texto, opts) {
+    opts = opts || {};
+    if (tbtnClickHandler) { $tbtn.removeEventListener('click', tbtnClickHandler); tbtnClickHandler = null; }
+    if (!opts.keepEquation) $teq.classList.remove('show');
+    $timg.src = RAFA_IMG[imgKey];
+    $ttxt.textContent = texto;
+    $tbtn.classList.remove('show');
+
+    if (opts.button) {
+      $tbtn.textContent = opts.button;
+      $tbtn.classList.add('show');
+    }
+    if (opts.onClick) {
+      tbtnClickHandler = () => {
+        $tbtn.removeEventListener('click', tbtnClickHandler);
+        tbtnClickHandler = null;
+        opts.onClick();
+      };
+      $tbtn.addEventListener('click', tbtnClickHandler);
+    }
+    if (opts.equation) {
+      $teq.textContent = opts.equation;
+      $teq.classList.add('show');
+    }
+    if (opts.onDone) opts.onDone();
+  }
+
+  /* ══════════ SIMULAÇÃO MOLECULAR ══════════ */
+  const canvas = document.getElementById('moleculeCanvas');
+  const ctx = canvas.getContext('2d');
+  const tubeEl = document.getElementById('molecule-tube');
+  const moleculeCount = 25;
+  const baseSpeed = 60;
+  const molecules = [];
+
+  function randIn(min, max) { return Math.random() * (max - min) + min; }
+
+  function resizeCanvas() {
+    const rect = tubeEl.getBoundingClientRect();
+    canvas.width = Math.max(40, Math.round(rect.width));
+    canvas.height = Math.max(40, Math.round(rect.height));
+  }
+
+  function makeMolecule(ceiling) {
+    const speed = randIn(0.85, 1.15) * baseSpeed;
+    const angle = randIn(0, Math.PI * 2);
+    return {
+      x: randIn(8, canvas.width - 8),
+      y: randIn(ceiling + 8, canvas.height - 8),
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      r: 7,
+      hue: randIn(188, 208)
+    };
+  }
+
+  function buildMolecules(count) {
+    molecules.length = 0;
+    renderFill = state.fillFraction;
+    const ceiling = canvas.height * (1 - state.fillFraction);
+    for (let i = 0; i < (count || moleculeCount); i++) molecules.push(makeMolecule(ceiling));
+  }
+
+  /* Mantém a densidade visual do gás (moléculas por área) em vez do total fixo — usado
+     na isobárica para que o gás não pareça "rarear" conforme o volume aumenta. */
+  function syncMoleculeCount(count) {
+    const ceiling = canvas.height * (1 - renderFill);
+    while (molecules.length < count) molecules.push(makeMolecule(ceiling));
+    while (molecules.length > count) molecules.pop();
+  }
+
+  function enforceBounds(m, ceiling) {
+    const left = m.r, right = canvas.width - m.r;
+    const top = ceiling + m.r, bottom = canvas.height - m.r;
+    if (m.x < left) { m.x = left; m.vx *= -1; }
+    else if (m.x > right) { m.x = right; m.vx *= -1; }
+    if (m.y < top) { m.y = top; m.vy *= -1; }
+    else if (m.y > bottom) { m.y = bottom; m.vy *= -1; }
+  }
+
+  function resolveCollision(a, b) {
+    let dx = b.x - a.x, dy = b.y - a.y;
+    let dist = Math.hypot(dx, dy);
+    const minDist = a.r + b.r;
+    if (dist === 0) { dx = randIn(-1, 1) || 0.5; dy = randIn(-1, 1) || 0.5; dist = Math.hypot(dx, dy); }
+    if (dist > minDist) return;
+    const nx = dx / dist, ny = dy / dist;
+    const overlap = Math.min(minDist - dist, minDist * 0.6);
+    a.x -= nx * overlap * 0.5; a.y -= ny * overlap * 0.5;
+    b.x += nx * overlap * 0.5; b.y += ny * overlap * 0.5;
+    const relVel = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+    if (relVel > 0) return;
+    const impulse = -relVel * 0.9;
+    a.vx -= impulse * nx; a.vy -= impulse * ny;
+    b.vx += impulse * nx; b.vy += impulse * ny;
+  }
+
+  function drawMolecule(x, y, r, hue) {
+    ctx.save();
+    ctx.shadowColor = `hsla(${hue}, 100%, 75%, 0.9)`;
+    ctx.shadowBlur = 9;
+    const g = ctx.createRadialGradient(x - 2, y - 2, 0.5, x, y, r);
+    g.addColorStop(0, `hsla(${hue}, 100%, 96%, 1)`);
+    g.addColorStop(0.6, `hsla(${hue}, 95%, 78%, 1)`);
+    g.addColorStop(1, `hsla(${hue}, 85%, 55%, 1)`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  let lastTime = performance.now();
+  let renderFill = 1;
+  const maxSpeed = 320;
+  function animate(now) {
+    const dt = Math.min(0.032, (now - lastTime) / 1000);
+    lastTime = now;
+
+    renderFill += (state.fillFraction - renderFill) * 0.06;
+    const ceiling = canvas.height * (1 - renderFill);
+    const targetSpeed = baseSpeed * (state.speedFactor || 1);
+
+    for (const m of molecules) {
+      const speed = Math.hypot(m.vx, m.vy) || 1;
+      const newSpeed = speed + (targetSpeed - speed) * 0.05;
+      const scale = newSpeed / speed;
+      m.vx *= scale; m.vy *= scale;
+      m.x += m.vx * dt; m.y += m.vy * dt;
+      enforceBounds(m, ceiling);
+    }
+    for (let i = 0; i < molecules.length; i++) {
+      for (let j = i + 1; j < molecules.length; j++) resolveCollision(molecules[i], molecules[j]);
+    }
+    for (const m of molecules) {
+      const speed = Math.hypot(m.vx, m.vy);
+      if (speed > maxSpeed) { const k = maxSpeed / speed; m.vx *= k; m.vy *= k; }
+      enforceBounds(m, ceiling);
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const m of molecules) drawMolecule(m.x, m.y, m.r, m.hue);
+
+    updatePiston(renderFill);
+
+    requestAnimationFrame(animate);
+  }
+
+  /* ══════════ ÊMBOLO (acompanha o teto real do gás, mesmo valor suavizado do canvas) ══════════ */
+  function updatePiston(fill) {
+    const tubeHeight = el.glassTube.clientHeight || 190;
+    const ceilingPx = tubeHeight * (1 - fill);
+    el.pistonDisc.style.top = ceilingPx + 'px';
+    el.pistonRod.style.height = (ceilingPx + 42) + 'px';
+  }
+
+  /* ══════════ LEITURAS / HUD / INSTRUMENTOS ══════════ */
+  function updateReadouts() {
+    el.hudTemp.textContent = `${Math.round(state.temperature)} K`;
+    el.hudVolume.textContent = `${Math.round(state.volumeRatio * 100)}%`;
+    el.hudPressure.textContent = `${state.pressure.toFixed(2)} atm`;
+
+    el.thermoNum.textContent = `${Math.round(state.temperature)} K`;
+    el.gaugeNum.textContent = `${state.pressure.toFixed(2)} atm`;
+
+    const thermoPct = Math.max(6, Math.min(100, ((state.temperature - 250) / (650 - 250)) * 100));
+    el.thermoFill.style.height = thermoPct + '%';
+
+    const needleAngle = Math.max(-75, Math.min(75, (state.pressure - 1) * 75));
+    el.gaugeNeedle.style.transform = `translate(-50%,-100%) rotate(${needleAngle}deg)`;
+
+    const glowStrength = Math.max(0, Math.min(1, (state.pressure - 1) / 1.3));
+    el.gaugeFace.style.boxShadow = `0 4px 10px rgba(0,0,0,.5), inset 0 0 6px rgba(0,0,0,.25), 0 0 ${8 + glowStrength * 16}px rgba(232,184,75,${0.15 + glowStrength * 0.35})`;
+  }
+
+  /* ══════════ ETAPAS ══════════ */
+  function resetQuestion() {
+    state.hasAsked = false;
+    state.answered = false;
+    state.questionCorrect = '';
+    el.feedback.textContent = '';
+    el.feedback.className = 'feedback';
+    el.choicesWrap.innerHTML = '';
+    el.questionBox.classList.remove('show');
+    $teq.classList.remove('show');
+  }
+
+  function buildChoices(options, correct, onCorrect) {
+    el.choicesWrap.innerHTML = '';
+    state.questionCorrect = correct;
+    options.forEach((opt) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        if (state.answered) return;
+        if (opt === state.questionCorrect) {
+          state.answered = true;
+          el.choicesWrap.querySelectorAll('button').forEach((b) => (b.disabled = true));
+          el.questionBox.classList.remove('show');
+          tocarDing();
+          onCorrect();
+        } else {
+          el.feedback.textContent = 'Ainda não — observe o experimento com atenção e tente novamente.';
+          el.feedback.className = 'feedback err';
+        }
+      });
+      el.choicesWrap.appendChild(btn);
+    });
+  }
+
+  function showEquation(text, rafaMsg) {
+    rafaFala('sorrindo', rafaMsg, {
+      equation: text,
+      button: 'Próximo',
+      onClick: advanceStage
+    });
+  }
+
+  function setupStage1() {
+    state.stage = 1;
+    state.compression = 0; state.heatLevel = 0;
+    state.fillFraction = 1; state.speedFactor = 1;
+    state.temperature = 300; state.pressure = 1; state.volumeRatio = 1;
+    resetQuestion();
+
+    el.palcoJogo.style.display = 'none';
+    el.controlRow.innerHTML = '';
+
+    el.lockThermo.classList.remove('show');
+    el.lockPiston.classList.remove('show');
+    el.lockGauge.classList.remove('show');
+    el.flame.classList.remove('on');
+
+    buildMolecules();
+
+    rafaFala('explicando', 'Etapa 1: Observe como as moléculas se movem livremente pelo recipiente, colidindo entre si e com as paredes, sem nenhuma atração entre elas. Quando estiver pronto, vamos iniciar as transformações.', {
+      button: 'Continuar',
+      onClick: setupStage2
+    });
+  }
+
+  function setupStage2() {
+    state.stage = 2;
+    state.compression = 0; state.heatLevel = 0;
+    state.fillFraction = 1; state.speedFactor = 1;
+    state.temperature = 300; state.pressure = 1; state.volumeRatio = 1;
+    resetQuestion();
+
+    el.palcoJogo.style.display = '';
+    el.controlRow.innerHTML = '';
+    const caption = document.createElement('div');
+    caption.className = 'control-caption';
+    caption.textContent = 'Manivela de compressão';
+
+    const crank = document.createElement('div');
+    crank.className = 'crank-wheel';
+
+    const slider = document.createElement('input');
+    slider.type = 'range'; slider.min = '0'; slider.max = '100'; slider.value = '0';
+    slider.className = 'slider';
+    slider.addEventListener('input', () => {
+      state.compression = Number(slider.value) / 100;
+      crank.style.transform = `rotate(${state.compression * 720}deg)`;
+      state.fillFraction = 1 - state.compression * 0.5;
+      state.volumeRatio = state.fillFraction;
+      state.pressure = 1 / state.fillFraction;
+      state.temperature = 300;
+
+      if (!state.hasAsked && state.volumeRatio <= 0.5001) {
+        state.hasAsked = true;
+        slider.disabled = true;
+        askStage2Question();
+      }
+    });
+
+    el.controlRow.appendChild(caption);
+    el.controlRow.appendChild(crank);
+    el.controlRow.appendChild(slider);
+
+    el.lockThermo.classList.add('show');
+    el.lockPiston.classList.remove('show');
+    el.lockGauge.classList.remove('show');
+    el.flame.classList.remove('on');
+
+    buildMolecules();
+
+    rafaFala('explicando', 'Etapa 2 — Transformação Isotérmica (Lei de Boyle). Aqui a temperatura fica travada em 300 K. Gire a manivela ao lado para comprimir o gás e observe o manômetro.');
+  }
+
+  function askStage2Question() {
+    el.questionBox.classList.add('show');
+    rafaFala('pensando', 'O volume chegou à metade. Observe o manômetro: o que aconteceu com a pressão do gás?');
+    buildChoices(['Aumentou', 'Diminuiu', 'Permaneceu igual'], 'Aumentou', () => {
+      showEquation('P₁V₁ = P₂V₂', 'Isso mesmo! Quando o volume diminui a uma temperatura constante, a pressão aumenta na mesma proporção — essa é a Lei de Boyle.');
+    });
+  }
+
+  function setupStage3() {
+    state.stage = 3;
+    state.compression = 0; state.heatLevel = 0;
+    state.fillFraction = 0.6; state.speedFactor = 1;
+    state.temperature = 300; state.pressure = 1; state.volumeRatio = 0.6;
+    resetQuestion();
+
+    el.palcoJogo.style.display = '';
+    el.controlRow.innerHTML = '';
+    const caption = document.createElement('div');
+    caption.className = 'control-caption';
+    caption.textContent = 'Intensidade da chama';
+    const slider = document.createElement('input');
+    slider.type = 'range'; slider.min = '0'; slider.max = '100'; slider.value = '0';
+    slider.className = 'slider';
+    slider.addEventListener('input', () => {
+      state.heatLevel = Number(slider.value) / 100;
+      el.flame.style.transform = `scaleY(${0.15 + state.heatLevel * 1.15})`;
+      state.fillFraction = Math.min(1, 0.6 + state.heatLevel * 0.68);
+      state.volumeRatio = state.fillFraction;
+      state.temperature = 300 + state.heatLevel * 260;
+      state.pressure = 1;
+      state.speedFactor = 1;
+      syncMoleculeCount(Math.round(moleculeCount * state.fillFraction));
+
+      if (!state.hasAsked && state.heatLevel >= 0.88) {
+        state.hasAsked = true;
+        slider.disabled = true;
+        askStage3Question();
+      }
+    });
+    el.controlRow.appendChild(caption);
+    el.controlRow.appendChild(slider);
+
+    el.lockThermo.classList.remove('show');
+    el.lockPiston.classList.remove('show');
+    el.lockGauge.classList.add('show');
+    el.flame.classList.add('on');
+
+    buildMolecules(Math.round(moleculeCount * state.fillFraction));
+
+    rafaFala('explicando', 'Etapa 3 — Transformação Isobárica (Lei de Charles). Agora o manômetro está travado: a pressão permanece constante. Aumente a chama do fogareiro e observe o volume do gás.');
+  }
+
+  function askStage3Question() {
+    el.questionBox.classList.add('show');
+    rafaFala('pensando', 'O gás foi aquecido sob pressão constante. O que você observou acontecer com o volume?');
+    buildChoices(['Aumentou', 'Diminuiu', 'Permaneceu igual'], 'Aumentou', () => {
+      showEquation('V₁/T₁ = V₂/T₂', 'Exato! Ao aquecer um gás mantendo a pressão constante, o volume aumenta — essa é a Lei de Charles.');
+    });
+  }
+
+  function setupStage4() {
+    state.stage = 4;
+    state.compression = 0; state.heatLevel = 0;
+    state.fillFraction = 1; state.speedFactor = 1;
+    state.temperature = 300; state.pressure = 1; state.volumeRatio = 1;
+    resetQuestion();
+
+    el.palcoJogo.style.display = '';
+    el.controlRow.innerHTML = '';
+    const caption = document.createElement('div');
+    caption.className = 'control-caption';
+    caption.textContent = 'Intensidade da chama';
+    const slider = document.createElement('input');
+    slider.type = 'range'; slider.min = '0'; slider.max = '100'; slider.value = '0';
+    slider.className = 'slider';
+    slider.addEventListener('input', () => {
+      state.heatLevel = Number(slider.value) / 100;
+      el.flame.style.transform = `scaleY(${0.15 + state.heatLevel * 1.2})`;
+      state.fillFraction = 1;
+      state.volumeRatio = 1;
+      state.temperature = 300 + state.heatLevel * 300;
+      state.pressure = 1 + state.heatLevel * 1.3;
+      state.speedFactor = 1 + state.heatLevel * 1.1;
+
+      if (!state.hasAsked && state.heatLevel >= 0.85) {
+        state.hasAsked = true;
+        slider.disabled = true;
+        askStage4Question();
+      }
+    });
+    el.controlRow.appendChild(caption);
+    el.controlRow.appendChild(slider);
+
+    el.lockThermo.classList.remove('show');
+    el.lockPiston.classList.add('show');
+    el.lockGauge.classList.remove('show');
+    el.flame.classList.add('on');
+
+    buildMolecules();
+
+    rafaFala('explicando', 'Etapa 4 — Transformação Isovolumétrica (Lei de Gay-Lussac). O êmbolo está travado e o volume não pode mudar. Aumente a chama e observe como a pressão se comporta.');
+  }
+
+  function askStage4Question() {
+    el.questionBox.classList.add('show');
+    rafaFala('pensando', 'Com o volume travado, o que aconteceu com a pressão à medida que a temperatura subiu?');
+    buildChoices(['Aumentou', 'Diminuiu', 'Permaneceu igual'], 'Aumentou', () => {
+      showEquation('P₁/T₁ = P₂/T₂', 'Perfeito! Com o volume constante, a pressão sobe junto com a temperatura — essa é a Lei de Gay-Lussac.');
+    });
+  }
+
+  /* ══════════ ETAPA FINAL — ASSOCIAÇÃO ══════════ */
+  function setupFinal() {
+    state.stage = 5;
+    el.stageRow.style.display = 'none';
+    el.flame.classList.remove('on');
+    el.finalBoard.classList.add('show');
+    rafaFala('animada', 'Chegou a hora de organizar tudo o que aprendemos. Associe cada pergaminho ao experimento correspondente.');
+    initDragMatch();
+  }
+
+  const finalNames = {
+    isotermica: 'Isotérmica',
+    isobarica: 'Isobárica',
+    isovolumetrica: 'Isovolumétrica'
+  };
+
+  function initDragMatch() {
+    const scrolls = document.querySelectorAll('.scroll');
+    const targets = document.querySelectorAll('.target');
+    let dragging = null;
+    let selected = null;
+    state.finalMatches = 0;
+
+    function selectScroll(scroll) {
+      if (scroll.classList.contains('placed')) return;
+      if (selected) selected.classList.remove('selected');
+      selected = selected === scroll ? null : scroll;
+      if (selected) selected.classList.add('selected');
+    }
+
+    function attemptMatch(target, scroll) {
+      if (!scroll || target.classList.contains('correct')) return;
+      const expected = target.dataset.accept;
+      const got = scroll.dataset.type;
+
+      if (expected === got) {
+        target.classList.add('correct');
+        scroll.classList.remove('selected');
+        scroll.classList.add('placed');
+        scroll.draggable = false;
+        document.getElementById('placedName-' + got).textContent = finalNames[got] + ' — ';
+        state.finalMatches += 1;
+        selected = null;
+        tocarDing();
+
+        if (state.finalMatches === 3) {
+          el.finalFeedback.textContent = 'Excelente! Agora você já conhece as três principais transformações gasosas.';
+          saveProgress();
+          setTimeout(showWin, 2200);
+        } else {
+          el.finalFeedback.textContent = 'Boa! Continue associando os pergaminhos.';
+        }
+      } else {
+        el.finalFeedback.textContent = 'Associação incorreta. Observe as ilustrações com calma e tente novamente.';
+      }
+    }
+
+    scrolls.forEach((scroll) => {
+      scroll.addEventListener('dragstart', () => { dragging = scroll; scroll.style.opacity = '0.5'; });
+      scroll.addEventListener('dragend', () => { scroll.style.opacity = '1'; dragging = null; });
+      scroll.addEventListener('click', () => selectScroll(scroll));
+    });
+
+    targets.forEach((target) => {
+      target.addEventListener('dragover', (e) => { e.preventDefault(); target.classList.add('dragover'); });
+      target.addEventListener('dragleave', () => target.classList.remove('dragover'));
+      target.addEventListener('drop', (e) => {
+        e.preventDefault();
+        target.classList.remove('dragover');
+        attemptMatch(target, dragging);
+      });
+      target.addEventListener('click', () => {
+        if (selected) attemptMatch(target, selected);
+      });
+    });
+  }
+
+  function saveProgress() {
+    try {
+      const key = 'kifacilProgresso';
+      const raw = localStorage.getItem(key);
+      const data = raw ? JSON.parse(raw) : {};
+      data.transformacoesGasosas = { concluida: true, data: new Date().toISOString() };
+      localStorage.setItem(key, JSON.stringify(data));
+      localStorage.setItem('faseTransformacoesGasosasConcluida', 'true');
+    } catch (e) { /* localStorage indisponível */ }
+  }
+
+  function showWin() {
+    el.finalBoard.classList.remove('show');
+    el.winScreen.classList.add('show');
+  }
+
+  /* ══════════ FLUXO ══════════ */
+  function advanceStage() {
+    if (state.stage === 2) setupStage3();
+    else if (state.stage === 3) setupStage4();
+    else if (state.stage === 4) setupFinal();
+  }
+
+  el.restartBtn.addEventListener('click', () => window.location.reload());
+
+  function iniciarIntro() {
+    document.body.classList.add('intro-ativa');
+    $tbtn.addEventListener('click', function onIntro1() {
+      $tbtn.removeEventListener('click', onIntro1);
+      rafaFala('explicando', 'Para simplificar nosso estudo, vamos considerar um gás ideal — um modelo em que as moléculas não exercem nenhuma força de atração umas sobre as outras.', {
+        button: 'Iniciar experimento',
+        onDone: () => {
+          $tbtn.addEventListener('click', function onIntro2() {
+            $tbtn.removeEventListener('click', onIntro2);
+            $tbtn.classList.remove('show');
+            document.body.classList.remove('intro-ativa');
+            setupStage1();
+          });
+        }
+      });
+    });
+    rafaFala('sorrindo', 'Hoje estudaremos como um gás responde quando alteramos pressão, temperatura e volume.', { button: 'Continuar' });
+  }
+
+  function init() {
+    resizeCanvas();
+    buildMolecules();
+    window.addEventListener('resize', () => { resizeCanvas(); });
+    window.addEventListener('load', () => { resizeCanvas(); buildMolecules(); });
+    requestAnimationFrame(animate);
+    setInterval(updateReadouts, 150);
+    setTimeout(iniciarIntro, 400);
+  }
+
+  init();
+})();
+</script>
+
+<script>
+(function () {
+  var _clickSom = new Audio('../sons/click.mp3');
+  _clickSom.preload = 'auto';
+  document.addEventListener('click', function (e) {
+    var alvo = e.target.closest('button');
+    if (alvo) { try { _clickSom.currentTime = 0; _clickSom.play().catch(function () {}); } catch (err) {} }
+  }, true);
+})();
+</script>
+<style>
+  /* ── MÚSICA DE FUNDO + CONTROLE DE VOLUME ── */
+  #controle-volume {
+    position: fixed;
+    bottom: 16px; right: 16px;
+    z-index: 300;
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(14,6,0,0.85);
+    border: 1.5px solid rgba(212,170,106,0.4);
+    border-radius: 24px;
+    padding: 8px 16px 8px 10px;
+  }
+  #btn-mute {
+    background: none; border: none;
+    color: #e8b84b; font-size: 18px;
+    cursor: pointer; padding: 0;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  #slider-volume { width: 90px; accent-color: #e8b84b; cursor: pointer; }
+</style>
+
+<div id="controle-volume">
+  <button id="btn-mute" onclick="alternarMudo()" aria-label="Silenciar ou ativar o som">🔊</button>
+  <input type="range" id="slider-volume" min="0" max="100" value="35" oninput="ajustarVolume(this.value)" aria-label="Volume">
+</div>
+
+<script>
+(function () {
+  let volumeSalvo = parseFloat(localStorage.getItem('kifacil_volume'));
+  if (isNaN(volumeSalvo)) volumeSalvo = 0.35;
+  let silenciado = localStorage.getItem('kifacil_silenciado') === '1';
+  let musicaFundo = null;
+
+  function volumeEfetivo() {
+    return silenciado ? 0 : volumeSalvo;
+  }
+
+  function iniciarMusicaFundo() {
+    if (musicaFundo) return;
+    try {
+      musicaFundo = new Audio('../sons/natureza.mp3');
+      musicaFundo.loop = true;
+      musicaFundo.volume = volumeEfetivo();
+      musicaFundo.play().catch(function () {});
+    } catch (e) {}
+  }
+
+  function atualizarIconeMudo() {
+    const botao = document.getElementById('btn-mute');
+    if (!botao) return;
+    if (silenciado || volumeSalvo === 0) botao.textContent = '🔇';
+    else if (volumeSalvo < 0.5) botao.textContent = '🔉';
+    else botao.textContent = '🔊';
+  }
+
+  window.alternarMudo = function () {
+    silenciado = !silenciado;
+    localStorage.setItem('kifacil_silenciado', silenciado ? '1' : '0');
+    if (musicaFundo) musicaFundo.volume = volumeEfetivo();
+    atualizarIconeMudo();
+  };
+
+  window.ajustarVolume = function (valorSlider) {
+    volumeSalvo = Math.max(0, Math.min(1, valorSlider / 100));
+    localStorage.setItem('kifacil_volume', volumeSalvo);
+    if (volumeSalvo > 0 && silenciado) {
+      silenciado = false;
+      localStorage.setItem('kifacil_silenciado', '0');
+    }
+    if (musicaFundo) musicaFundo.volume = volumeEfetivo();
+    atualizarIconeMudo();
+  };
+
+  const slider = document.getElementById('slider-volume');
+  if (slider) slider.value = Math.round(volumeSalvo * 100);
+  atualizarIconeMudo();
+  iniciarMusicaFundo();
+
+  const ativarSom = function () {
+    if (!musicaFundo) iniciarMusicaFundo();
+    if (musicaFundo) {
+      musicaFundo.volume = volumeEfetivo();
+      musicaFundo.play().catch(function () {});
+    }
+  };
+  window.addEventListener('pointerdown', ativarSom, { once: true });
+  window.addEventListener('keydown', ativarSom, { once: true });
+})();
+</script>
+</body>
+</html>
